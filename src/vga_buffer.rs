@@ -1,3 +1,6 @@
+#[cfg(test)]
+extern crate speculate;
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -144,7 +147,9 @@ pub fn _print(args: fmt::Arguments) {
 }
 
 #[cfg(test)]
-mod test {
+use speculate::speculate;
+
+speculate ! {
     use super::*;
 
     fn construct_writer() -> Writer {
@@ -159,6 +164,8 @@ mod test {
     }
 
     fn construct_buffer() -> Buffer {
+        use array_init::array_init;
+
         Buffer {
             chars: array_init(|_| array_init(|_| Volatile::new(empty_char()))),
         }
@@ -171,6 +178,63 @@ mod test {
         }
     }
 
-    #[test]
-    fn foo() {}
+    context "given a writer" {
+        context "when writing bytes" {
+            before {
+                let mut writer = construct_writer();
+                writer.write_byte(b'X');
+                writer.write_byte(b'Y');
+            }
+
+            test "the screen has written the bytes" {
+                for (i, row) in writer.buffer.chars.iter().enumerate() {
+                    for (j, screen_char) in row.iter().enumerate() {
+                        let screen_char = screen_char.read();
+                        if i == BUFFER_HEIGHT - 1 && j == 0 {
+                            assert_eq!(screen_char.ascii_character, b'X');
+                            assert_eq!(screen_char.color_code, writer.color_code);
+                        } else if i == BUFFER_HEIGHT - 1 && j == 1 {
+                            assert_eq!(screen_char.ascii_character, b'Y');
+                            assert_eq!(screen_char.color_code, writer.color_code);
+                        } else {
+                            assert_eq!(screen_char, empty_char());
+                        }
+                    }
+                }
+            }
+        }
+
+        context "when writing a formatted string" {
+            before {
+                use core::fmt::Write;
+
+                let mut writer = construct_writer();
+                writeln!(&mut writer, "a").unwrap();
+                writeln!(&mut writer, "b{}", "c").unwrap();
+            }
+
+            test "the screen has written the string" {
+                for (i, row) in writer.buffer.chars.iter().enumerate() {
+                    for (j, screen_char) in row.iter().enumerate() {
+                        let screen_char = screen_char.read();
+                        if i == BUFFER_HEIGHT - 3 && j == 0 {
+                            assert_eq!(screen_char.ascii_character, b'a');
+                            assert_eq!(screen_char.color_code, writer.color_code);
+                        } else if i == BUFFER_HEIGHT - 2 && j == 0 {
+                            assert_eq!(screen_char.ascii_character, b'b');
+                            assert_eq!(screen_char.color_code, writer.color_code);
+                        } else if i == BUFFER_HEIGHT - 2 && j == 1 {
+                            assert_eq!(screen_char.ascii_character, b'c');
+                            assert_eq!(screen_char.color_code, writer.color_code);
+                        } else if i >= BUFFER_HEIGHT - 2 {
+                            assert_eq!(screen_char.ascii_character, b' ');
+                            assert_eq!(screen_char.color_code, writer.color_code);
+                        } else {
+                            assert_eq!(screen_char, empty_char());
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
