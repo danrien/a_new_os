@@ -152,33 +152,34 @@ use speculate::speculate;
 speculate ! {
     use super::*;
 
-    fn construct_writer() -> Writer {
-        use std::boxed::Box;
-
-        let buffer = construct_buffer();
-        Writer {
-            column_position: 0,
-            color_code: ColorCode::new(Color::Blue, Color::Magenta),
-            buffer: Box::leak(Box::new(buffer)),
-        }
-    }
-
-    fn construct_buffer() -> Buffer {
-        use array_init::array_init;
-
-        Buffer {
-            chars: array_init(|_| array_init(|_| Volatile::new(empty_char()))),
-        }
-    }
-
-    fn empty_char() -> ScreenChar {
-        ScreenChar {
-            ascii_character: b' ',
-            color_code: ColorCode::new(Color::Green, Color::Brown),
-        }
-    }
-
     context "given a writer" {
+
+        fn construct_writer() -> Writer {
+            use std::boxed::Box;
+
+            let buffer = construct_buffer();
+            Writer {
+                column_position: 0,
+                color_code: ColorCode::new(Color::Blue, Color::Magenta),
+                buffer: Box::leak(Box::new(buffer)),
+            }
+        }
+
+        fn construct_buffer() -> Buffer {
+            use array_init::array_init;
+
+            Buffer {
+                chars: array_init(|_| array_init(|_| Volatile::new(empty_char()))),
+            }
+        }
+
+        fn empty_char() -> ScreenChar {
+            ScreenChar {
+                ascii_character: b' ',
+                color_code: ColorCode::new(Color::Green, Color::Brown),
+            }
+        }
+        
         context "when writing bytes" {
             before {
                 let mut writer = construct_writer();
