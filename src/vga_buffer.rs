@@ -149,6 +149,7 @@ pub fn _print(args: fmt::Arguments) {
 #[cfg(test)]
 use speculate::speculate;
 
+#[cfg(test)]
 speculate ! {
     use super::*;
 
@@ -179,7 +180,7 @@ speculate ! {
                 color_code: ColorCode::new(Color::Green, Color::Brown),
             }
         }
-        
+
         context "when writing bytes" {
             before {
                 let mut writer = construct_writer();

@@ -1,8 +1,9 @@
-#![cfg_attr(not(test), no_std)]
+#![no_std]
 #![cfg_attr(not(test), no_main)]
-#![cfg_attr(test, allow(unused_imports))]
+#![cfg_attr(test, allow(dead_code, unused_macros, unused_imports))]
 
 use core::panic::PanicInfo;
+use a_new_os::println;
 
 #[cfg(not(test))]
 #[panic_handler]
@@ -15,10 +16,7 @@ fn panic(info: &PanicInfo) -> ! {
 #[cfg(not(test))]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    println!("Hello {}!", "Bobby");
-    // panic!("Some panic message");
+    println!("Hello {}!", "Guest");
 
     loop {}
 }
-
-mod vga_buffer;
