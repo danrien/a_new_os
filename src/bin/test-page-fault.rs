@@ -10,8 +10,14 @@ use a_new_os::{exit_qemu, serial_println};
 pub extern "C" fn _start() -> ! {
     a_new_os::interrupts::init_idt();
 
-    // invoke a breakpoint exception
-    x86_64::instructions::int3();
+    // trigger a page fault
+    unsafe {
+        *(0xdeadbeef as *mut u64) = 42;
+    };
+
+    serial_println!("failed");
+
+    unsafe { exit_qemu(); }
     loop {}
 }
 
