@@ -18,5 +18,7 @@ fn panic(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     println!("Hello {}!", "Guest");
 
+    a_new_os::interrupts::init_idt();
+
     loop {}
 }

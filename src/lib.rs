@@ -1,7 +1,10 @@
+#![feature(abi_x86_interrupt)]
 #![cfg_attr(not(test), no_std)]
 
 pub mod vga_buffer;
 pub mod serial;
+#[cfg(not(windows))]
+pub mod interrupts;
 
 pub unsafe fn exit_qemu() {
     use x86_64::instructions::port::Port;
