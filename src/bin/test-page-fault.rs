@@ -23,7 +23,7 @@ pub extern "C" fn _start() -> ! {
 
 #[cfg(not(test))]
 #[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
+fn panic(_info: &PanicInfo) -> ! {
     serial_println!("ok");
 
     unsafe { exit_qemu(); }
